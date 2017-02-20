@@ -1,10 +1,9 @@
-
 /**
  * Common dependencies.
  */
 
-var ws = require('../lib/websocket.io')
-  , Client = require('ws')
+var ws = require('../lib/websocket.io'),
+    Client = require('ws')
 
 /**
  * Creates a http.Server that listens on an ephemeral port.
@@ -12,30 +11,30 @@ var ws = require('../lib/websocket.io')
  * @api public
  */
 
-listen = function (options, fn) {
-  if ('function' == typeof options) {
-    fn = options;
-    options = {};
-  }
+listen = function(options, fn) {
+    if ('function' == typeof options) {
+        fn = options;
+        options = {};
+    }
 
-  var w = new ws.Server(options)
-    , server = require('http').createServer()
+    var w = new ws.Server(options),
+        server = require('http').createServer()
 
-  server.listen(function (err) {
-    if (err) throw err;
-    fn(server.address(), w);
-  });
+    server.listen(function(err) {
+        if (err) throw err;
+        fn(server.address(), w);
+    });
 
-  server.on('upgrade', function (req, socket, head) {
-    w.handleUpgrade(req, socket, head);
-  });
+    server.on('upgrade', function(req, socket, head) {
+        w.handleUpgrade(req, socket, head);
+    });
 
-  // shortcut for closing the actual server
-  w.close = function () {
-    server.close();
-  }
+    // shortcut for closing the actual server
+    w.close = function() {
+        server.close();
+    }
 
-  return w;
+    return w;
 }
 
 /**
@@ -44,10 +43,15 @@ listen = function (options, fn) {
  * @api public
  */
 
-client = function (addr, path) {
-  var cl = new Client('ws://' + addr.address + ':' + addr.port + (path || ''));
-  cl.on('error', function (e) {
-    throw e;
-  });
-  return cl;
+client = function(addr, path) {
+    var address = addr.address;
+    if (addr.family == 'IPv6') {
+        address = '[' + address + ']';
+    }
+
+    var cl = new Client('ws://' + address + ':' + addr.port + (path || ''));
+    cl.on('error', function(e) {
+        throw e;
+    });
+    return cl;
 }
